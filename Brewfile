@@ -1,0 +1,31 @@
+# Taps
+tap "homebrew/bundle"
+
+# CLI Tools
+brew "awscli"
+brew "bat"
+brew "bun"
+# brew "colima"
+brew "direnv"
+# brew "docker"
+brew "fish"
+brew "gh"
+brew "gnumake"
+brew "htop"
+brew "jq"
+brew "just"
+brew "lazygit"
+brew "lf"
+brew "lsof"
+brew "nvm"
+brew "pnpm"
+brew "tokei"
+brew "wget"
+brew "zoxide"
+
+# Casks (GUI Applications)
+cask "ghostty"
+cask "helium"
+cask "raycast"
+cask "visual-studio-code"
+cask "zen-browser"

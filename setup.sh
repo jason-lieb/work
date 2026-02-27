@@ -84,26 +84,30 @@ for lang in typescript typescriptreact javascript javascriptreact; do
     link_file "$DOTFILES_DIR/vscode/snippets/typescript.json" "$VSCODE_USER_DIR/snippets/${lang}.json"
 done
 
-# Install VSCode extensions
+# Install VSCode extensions (skip already installed)
 echo "Installing VSCode extensions..."
+INSTALLED_EXTENSIONS=$(code --list-extensions)
 while IFS= read -r line || [[ -n "$line" ]]; do
     [[ "$line" =~ ^#.*$ || -z "$line" ]] && continue
-    code --install-extension "$line"
+    if ! echo "$INSTALLED_EXTENSIONS" | grep -qi "^${line}$"; then
+        code --install-extension "$line"
+    fi
 done < "$DOTFILES_DIR/vscode/extensions.txt"
 
 # Enable Touch ID for sudo
 SUDO_LOCAL="/etc/pam.d/sudo_local"
-if [[ ! -f "$SUDO_LOCAL" ]] || ! grep -q "pam_tid.so" "$SUDO_LOCAL"; then
+if ! grep -q "pam_tid.so" "$SUDO_LOCAL" 2>/dev/null; then
     echo "Enabling Touch ID for sudo (requires sudo)..."
-    echo "auth       sufficient     pam_tid.so" | sudo tee "$SUDO_LOCAL" > /dev/null
+    echo "auth       sufficient     pam_tid.so" | sudo tee -a "$SUDO_LOCAL" > /dev/null
 fi
 
 # Set fish as default shell if not already
 FISH_PATH="/opt/homebrew/bin/fish"
-if [[ "$SHELL" != "$FISH_PATH" ]]; then
+CURRENT_SHELL=$(dscl . -read ~/ UserShell | awk '{print $2}')
+if [[ "$CURRENT_SHELL" != "$FISH_PATH" ]]; then
     if ! grep -q "$FISH_PATH" /etc/shells; then
         echo "Adding fish to /etc/shells (requires sudo)..."
-        echo "$FISH_PATH" | sudo tee -a /etc/shells
+        echo "$FISH_PATH" | sudo tee -a /etc/shells > /dev/null
     fi
     echo "Setting fish as default shell..."
     chsh -s "$FISH_PATH"
@@ -112,6 +116,3 @@ fi
 echo ""
 echo "Setup complete!"
 echo ""
-echo "Manual steps remaining:"
-echo "1. Update AWS config with your credentials: $HOME_DIR/.aws/config"
-echo "2. Restart your terminal to use fish shell"

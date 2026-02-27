@@ -8,8 +8,8 @@ if type -q zoxide
     zoxide init fish | source
 end
 
-# PATH
-set -gx fish_user_paths $HOME/bin $HOME/.local/bin /opt/homebrew/bin /usr/local/bin
+# PATH (prepend to preserve paths from conf.d scripts like Nix)
+fish_add_path --prepend $HOME/bin $HOME/.local/bin /opt/homebrew/bin /usr/local/bin
 
 # Environment variables
 set -gx EDITOR "code"

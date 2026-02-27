@@ -1,6 +1,6 @@
 #!/bin/bash
 # Setup script for dotfiles
-# Run this script to symlink all dotfiles to your home directory
+# Run this script to set up a new Mac with all dotfiles and packages
 
 set -e
 
@@ -8,6 +8,25 @@ DOTFILES_DIR="$(cd "$(dirname "$0")" && pwd)"
 HOME_DIR="$HOME"
 
 echo "Setting up dotfiles from $DOTFILES_DIR"
+
+# Install Homebrew if not present
+if ! command -v brew &> /dev/null; then
+    echo "Installing Homebrew..."
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+    # Add Homebrew to PATH for this session
+    if [[ -f /opt/homebrew/bin/brew ]]; then
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+    elif [[ -f /usr/local/bin/brew ]]; then
+        eval "$(/usr/local/bin/brew shellenv)"
+    fi
+else
+    echo "Homebrew already installed"
+fi
+
+# Install packages from Brewfile
+echo "Installing packages from Brewfile..."
+brew bundle --file="$DOTFILES_DIR/Brewfile"
 
 # Create necessary directories
 mkdir -p "$HOME_DIR/.config/fish"
@@ -65,13 +84,34 @@ for lang in typescript typescriptreact javascript javascriptreact; do
     link_file "$DOTFILES_DIR/vscode/snippets/typescript.json" "$VSCODE_USER_DIR/snippets/${lang}.json"
 done
 
+# Install VSCode extensions
+echo "Installing VSCode extensions..."
+while IFS= read -r line || [[ -n "$line" ]]; do
+    [[ "$line" =~ ^#.*$ || -z "$line" ]] && continue
+    code --install-extension "$line"
+done < "$DOTFILES_DIR/vscode/extensions.txt"
+
+# Enable Touch ID for sudo
+SUDO_LOCAL="/etc/pam.d/sudo_local"
+if [[ ! -f "$SUDO_LOCAL" ]] || ! grep -q "pam_tid.so" "$SUDO_LOCAL"; then
+    echo "Enabling Touch ID for sudo (requires sudo)..."
+    echo "auth       sufficient     pam_tid.so" | sudo tee "$SUDO_LOCAL" > /dev/null
+fi
+
+# Set fish as default shell if not already
+FISH_PATH="/opt/homebrew/bin/fish"
+if [[ "$SHELL" != "$FISH_PATH" ]]; then
+    if ! grep -q "$FISH_PATH" /etc/shells; then
+        echo "Adding fish to /etc/shells (requires sudo)..."
+        echo "$FISH_PATH" | sudo tee -a /etc/shells
+    fi
+    echo "Setting fish as default shell..."
+    chsh -s "$FISH_PATH"
+fi
+
 echo ""
-echo "Dotfiles setup complete!"
+echo "Setup complete!"
 echo ""
-echo "Next steps:"
-echo "1. Install Homebrew: /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
-echo "2. Install packages: brew bundle --file=$DOTFILES_DIR/Brewfile"
-echo "3. Set fish as default shell: chsh -s /opt/homebrew/bin/fish"
-echo "4. Install VSCode extensions: cat $DOTFILES_DIR/vscode/extensions.txt | xargs -L1 code --install-extension"
-echo "5. Update AWS config with your credentials: $HOME_DIR/.aws/config"
-echo "6. Enable Touch ID for sudo (System Preferences > Touch ID & Password > Use Touch ID for sudo)"
+echo "Manual steps remaining:"
+echo "1. Update AWS config with your credentials: $HOME_DIR/.aws/config"
+echo "2. Restart your terminal to use fish shell"

@@ -10,6 +10,13 @@
     "AWS_PROFILE": "freckle-dev"
   },
   "model": "us.anthropic.claude-sonnet-4-20250514-v1:0",
-  "alwaysThinkingEnabled": false,
-  "statusLine": {"type": "command", "command": "npx ccstatusline@latest"}
+  "statusLine": {
+    "type": "command",
+    "command": "npx ccstatusline@latest"
+  },
+  "enabledPlugins": {
+    "code-reviewer@renaissance-marketplace": true,
+    "superpowers@renaissance-marketplace": true
+  },
+  "alwaysThinkingEnabled": false
 }

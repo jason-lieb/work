@@ -21,3 +21,9 @@ This will:
 - Back up any existing configs to `<config>.backup`
 
 **Note:** Install Docker separately after setup.
+
+**Claude Code Plugins:** After setup, install plugins manually:
+```bash
+claude plugin add code-reviewer@renaissance-marketplace
+claude plugin add superpowers@renaissance-marketplace
+```

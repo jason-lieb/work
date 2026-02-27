@@ -145,6 +145,10 @@ if [[ "$CURRENT_REMOTE" == https://github.com/* ]]; then
     echo "Remote updated: $SSH_REMOTE"
 fi
 
+# Install fish plugins
+echo "Installing fish plugins..."
+fish -c "fisher install jorgebucaran/nvm.fish" 2>/dev/null || true
+
 # Set fish as default shell if not already
 FISH_PATH="/opt/homebrew/bin/fish"
 CURRENT_SHELL=$(dscl . -read ~/ UserShell | awk '{print $2}')

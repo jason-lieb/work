@@ -77,5 +77,11 @@
   "typescript.updateImportsOnFileMove.enabled": "always",
   "update.mode": "none",
   "window.menuBarVisibility": "toggle",
-  "extensions.ignoreRecommendations": true
+  "extensions.ignoreRecommendations": true,
+  "terminal.integrated.defaultProfile.osx": "fish",
+  "terminal.integrated.profiles.osx": {
+    "fish": {
+      "path": "/opt/homebrew/bin/fish"
+    }
+  }
 }

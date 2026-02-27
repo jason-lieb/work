@@ -29,6 +29,7 @@ echo "Installing packages from Brewfile..."
 brew bundle --file="$DOTFILES_DIR/Brewfile"
 
 # Create necessary directories
+mkdir -p "$HOME_DIR/.ssh"
 mkdir -p "$HOME_DIR/.config/fish"
 mkdir -p "$HOME_DIR/.config/ghostty"
 mkdir -p "$HOME_DIR/.config/gh"
@@ -42,6 +43,11 @@ mkdir -p "$HOME_DIR/Library/Application Support/Code/User/snippets"
 link_file() {
     local src="$1"
     local dest="$2"
+
+    # Skip if symlink already points to correct target
+    if [ -L "$dest" ] && [ "$(readlink "$dest")" = "$src" ]; then
+        return
+    fi
 
     if [ -e "$dest" ] && [ ! -L "$dest" ]; then
         echo "Backing up existing $dest to ${dest}.backup"
@@ -69,6 +75,9 @@ link_file "$DOTFILES_DIR/.gitignore" "$HOME_DIR/.gitignore"
 link_file "$DOTFILES_DIR/.config/ghostty/config" "$HOME_DIR/.config/ghostty/config"
 link_file "$DOTFILES_DIR/.config/gh/config.yml" "$HOME_DIR/.config/gh/config.yml"
 link_file "$DOTFILES_DIR/.config/direnv/direnvrc" "$HOME_DIR/.config/direnv/direnvrc"
+
+# Link SSH config
+link_file "$DOTFILES_DIR/.ssh/config" "$HOME_DIR/.ssh/config"
 
 # Link other configs
 link_file "$DOTFILES_DIR/.aws/config" "$HOME_DIR/.aws/config"
@@ -99,6 +108,41 @@ SUDO_LOCAL="/etc/pam.d/sudo_local"
 if ! grep -q "pam_tid.so" "$SUDO_LOCAL" 2>/dev/null; then
     echo "Enabling Touch ID for sudo (requires sudo)..."
     echo "auth       sufficient     pam_tid.so" | sudo tee -a "$SUDO_LOCAL" > /dev/null
+fi
+
+# SSH key setup
+SSH_KEY="$HOME_DIR/.ssh/id_ed25519"
+if [ ! -f "$SSH_KEY" ]; then
+    echo ""
+    printf "No SSH key found. Enter your email for the SSH key: "
+    read -r email_address
+    HOSTNAME=$(scutil --get ComputerName 2>/dev/null || hostname -s)
+    echo "Generating SSH key..."
+    ssh-keygen -t ed25519 -C "$email_address" -N "" -f "$SSH_KEY"
+    echo "SSH key generated at $SSH_KEY"
+
+    # Add key to GitHub if gh is authenticated
+    if gh auth status &>/dev/null; then
+        echo "Adding SSH key to GitHub..."
+        gh ssh-key add "$SSH_KEY.pub" --title "$HOSTNAME"
+        echo "SSH key added to GitHub as '$HOSTNAME'"
+    else
+        echo ""
+        echo "To add your SSH key to GitHub, run:"
+        echo "  gh auth login"
+        echo "  gh ssh-key add $SSH_KEY.pub --title \"$HOSTNAME\""
+    fi
+else
+    echo "SSH key already exists at $SSH_KEY"
+fi
+
+# Switch dotfiles repo from HTTPS to SSH
+CURRENT_REMOTE=$(git -C "$DOTFILES_DIR" remote get-url origin 2>/dev/null || echo "")
+if [[ "$CURRENT_REMOTE" == https://github.com/* ]]; then
+    SSH_REMOTE=$(echo "$CURRENT_REMOTE" | sed 's|https://github.com/|git@github.com:|')
+    echo "Switching dotfiles remote to SSH..."
+    git -C "$DOTFILES_DIR" remote set-url origin "$SSH_REMOTE"
+    echo "Remote updated: $SSH_REMOTE"
 fi
 
 # Set fish as default shell if not already

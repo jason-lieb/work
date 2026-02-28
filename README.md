@@ -7,7 +7,7 @@ Personal macOS configuration for a new machine.
 ```bash
 git clone <https-repo-url>
 cd work
-./setup.sh
+./install
 ```
 
 This will:

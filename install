@@ -63,34 +63,34 @@ link_file() {
 }
 
 # Link shell configs
-link_file "$DOTFILES_DIR/.config/fish/config.fish" "$HOME_DIR/.config/fish/config.fish"
-link_file "$DOTFILES_DIR/.bashrc" "$HOME_DIR/.bashrc"
-link_file "$DOTFILES_DIR/.zshrc" "$HOME_DIR/.zshrc"
+link_file "$DOTFILES_DIR/config/.config/fish/config.fish" "$HOME_DIR/.config/fish/config.fish"
+link_file "$DOTFILES_DIR/config/.bashrc" "$HOME_DIR/.bashrc"
+link_file "$DOTFILES_DIR/config/.zshrc" "$HOME_DIR/.zshrc"
 
 # Link git configs
-link_file "$DOTFILES_DIR/.gitconfig" "$HOME_DIR/.gitconfig"
-link_file "$DOTFILES_DIR/.gitignore" "$HOME_DIR/.gitignore"
+link_file "$DOTFILES_DIR/config/.gitconfig" "$HOME_DIR/.gitconfig"
+link_file "$DOTFILES_DIR/config/.gitignore" "$HOME_DIR/.gitignore"
 
 # Link app configs
-link_file "$DOTFILES_DIR/.config/ghostty/config" "$HOME_DIR/.config/ghostty/config"
-link_file "$DOTFILES_DIR/.config/gh/config.yml" "$HOME_DIR/.config/gh/config.yml"
-link_file "$DOTFILES_DIR/.config/direnv/direnvrc" "$HOME_DIR/.config/direnv/direnvrc"
+link_file "$DOTFILES_DIR/config/.config/ghostty/config" "$HOME_DIR/.config/ghostty/config"
+link_file "$DOTFILES_DIR/config/.config/gh/config.yml" "$HOME_DIR/.config/gh/config.yml"
+link_file "$DOTFILES_DIR/config/.config/direnv/direnvrc" "$HOME_DIR/.config/direnv/direnvrc"
 
 # Link SSH config
-link_file "$DOTFILES_DIR/.ssh/config" "$HOME_DIR/.ssh/config"
+link_file "$DOTFILES_DIR/config/.ssh/config" "$HOME_DIR/.ssh/config"
 
 # Link other configs
-link_file "$DOTFILES_DIR/.aws/config" "$HOME_DIR/.aws/config"
-link_file "$DOTFILES_DIR/.claude/settings.json" "$HOME_DIR/.claude/settings.json"
-link_file "$DOTFILES_DIR/.npmrc" "$HOME_DIR/.npmrc"
+link_file "$DOTFILES_DIR/config/.aws/config" "$HOME_DIR/.aws/config"
+link_file "$DOTFILES_DIR/config/.claude/settings.json" "$HOME_DIR/.claude/settings.json"
+link_file "$DOTFILES_DIR/config/.npmrc" "$HOME_DIR/.npmrc"
 
 # Link VSCode settings (macOS path)
 VSCODE_USER_DIR="$HOME_DIR/Library/Application Support/Code/User"
-link_file "$DOTFILES_DIR/vscode/settings.json" "$VSCODE_USER_DIR/settings.json"
+link_file "$DOTFILES_DIR/config/vscode/settings.json" "$VSCODE_USER_DIR/settings.json"
 
 # Link VSCode snippets
 for lang in typescript typescriptreact javascript javascriptreact; do
-    link_file "$DOTFILES_DIR/vscode/snippets/typescript.json" "$VSCODE_USER_DIR/snippets/${lang}.json"
+    link_file "$DOTFILES_DIR/config/vscode/snippets/typescript.json" "$VSCODE_USER_DIR/snippets/${lang}.json"
 done
 
 # Install VSCode extensions (skip already installed)
@@ -101,7 +101,7 @@ while IFS= read -r line || [[ -n "$line" ]]; do
     if ! echo "$INSTALLED_EXTENSIONS" | grep -qi "^${line}$"; then
         code --install-extension "$line"
     fi
-done < "$DOTFILES_DIR/vscode/extensions.txt"
+done < "$DOTFILES_DIR/config/vscode/extensions.txt"
 
 # Enable Touch ID for sudo
 SUDO_LOCAL="/etc/pam.d/sudo_local"
